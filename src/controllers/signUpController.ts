@@ -1,7 +1,5 @@
-import * as AWS from 'aws-sdk';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-
-const dynamodb = new AWS.DynamoDB();
+import AWS, { dynamodb } from '../config/aws';
 
 export const signUpController = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {

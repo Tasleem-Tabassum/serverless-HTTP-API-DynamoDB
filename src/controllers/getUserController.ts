@@ -1,7 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import * as AWS from 'aws-sdk';
-
-const dynamodb = new AWS.DynamoDB();
+import AWS, { dynamodb } from '../config/aws';
 
 export const getUserController = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     let tableItems;

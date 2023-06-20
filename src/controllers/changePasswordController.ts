@@ -1,4 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import AWS, { dynamodb } from '../config/aws';
 
 export const changePasswordController = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {

@@ -14,4 +14,3 @@ export const getUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 export const changePassword = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => changePasswordController(event)
 
 export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => updateUserController(event)
-
