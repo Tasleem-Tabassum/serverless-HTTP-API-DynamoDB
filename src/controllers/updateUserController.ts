@@ -1,7 +1,12 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 
-export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const updateUserController = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify({  })
+      }
 
     } catch(error) {
         console.error('Error while updating user profile:', error);

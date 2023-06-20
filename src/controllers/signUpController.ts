@@ -1,9 +1,9 @@
-import AWS from 'aws-sdk';
+import * as AWS from 'aws-sdk';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 const dynamodb = new AWS.DynamoDB();
 
-export const signUp = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const signUpController = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const body: string | null = event.body ?? null;
 
@@ -20,6 +20,34 @@ export const signUp = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             return {
                 statusCode: 400,
                 body: "All the fields are mandatory"
+            }
+        }
+
+        if(userName !== String) {
+            return {
+                statusCode: 400,
+                body: "UserName must be a string"
+            }
+        }
+
+        if(password !== String) {
+            return {
+                statusCode: 400,
+                body: "Password must be a string"
+            }
+        }
+
+        if(name !== String) {
+            return {
+                statusCode: 400,
+                body: "Name must be a string"
+            }
+        }
+        
+        if(mobile !== Number) {
+            return {
+                statusCode: 400,
+                body: "Mobile Number must be a number"
             }
         }
 

@@ -2,8 +2,9 @@
   "compilerOptions": {
     "target": "es2016",
     "strict": true,
+    "module":"CommonJS",
     "outDir": "dist"
   },
-  "include": ["*.ts", "src/*.ts"],
+  "include": ["*.ts", "src/*.ts", "src/controllers/changePasswordController.ts", "src/controllers/getUserController.ts", "src/controllers/loginController.ts", "src/controllers/signUpController.ts", "src/controllers/updateUserController.ts"],
   "exclude": ["node_modules"]
 }

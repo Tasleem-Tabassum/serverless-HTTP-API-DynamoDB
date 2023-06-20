@@ -27,37 +27,37 @@ plugins:
 
 functions:
   home:
-    handler: index.handler
+    handler: dist/index.handler
     events:
       - httpApi:
           path: /
           method: GET
   signUp:
-    handler: src/signUp.signUp
+    handler: dist/src/handler.signUp
     events:
       - httpApi:
           path: /signup
           method: POST
   login:
-    handler: src/login.login
+    handler: dist/src/handler.login
     events:
       - httpApi:
           path: /login
           method: POST
   getUser:
-    handler: src/getUser.getUser
+    handler: dist/src/handler.getUser
     events:
       - httpApi:
           path: /getUser
           method: GET
   updateUser:
-    handler: src/updateUser.updateUser
+    handler: dist/src/handler.updateUser
     events:
       - httpApi:
           path: /updateUser
           method: PATCH
   changePassword:
-    handler: src/changePassword.changePassword
+    handler: dist/src/handler.changePassword
     events:
       - httpApi:
           path: /changePassword

@@ -1,7 +1,11 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 
-export const changePassword = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const changePasswordController = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({  })
+      }
 
     } catch(error) {
         console.error('Error while changing password:', error);

@@ -1,16 +1,20 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import AWS from "aws-sdk";
+import * as AWS from 'aws-sdk';
 
 const dynamodb = new AWS.DynamoDB();
 
-export const getUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const getUserController = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     let tableItems;
 
     try {
         await dynamodb.scan({ 
             TableName: process.env.USERS_TABLE || ''
-        }, (error, data) => {
-            tableItems = data.Items
+        }, (error: AWS.AWSError, data: AWS.DynamoDB.ScanOutput) => {
+            if(error) {
+                console.log('Error occured while scanning data from DynamoDB')
+            } else {
+                tableItems = data.Items
+            }
         })
         return {
             statusCode: 200,
