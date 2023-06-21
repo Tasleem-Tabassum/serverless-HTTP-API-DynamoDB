@@ -41,41 +41,40 @@ functions:
           path: /login
           method: POST
           cors: true
-  # verifyToken:
-  #   handler: dist/src/handler.verifyToken
   getUser:
     handler: dist/src/handler.getUser
     events:
       - httpApi:
           path: /user
           method: GET
-          # cors: true
-          # authorizer:
-          #   name: verifyToken
-          #   identitySource: method.request.header.Authorization
-          #   resultTtlInSeconds: 3600
+          cors: true
+          middleware:
+            pre:
+              - authenticateMiddleware
+              # - ${file(src/middleware/auth.middleware.ts):authenticateMiddleware}
   updateUser:
     handler: dist/src/handler.updateUser
     events:
       - httpApi:
           path: /user
           method: PUT
-          # cors: true
-          # authorizer:
-          #   name: verifyToken
-          #   identitySource: method.request.header.Authorization
-          #   resultTtlInSeconds: 3600
+          cors: true
+          middleware:
+            pre:
+              - authenticateMiddleware
+              # - ${file(src/middleware/auth.middleware.ts):authenticateMiddleware}
   changePassword:
     handler: dist/src/handler.changePassword
     events:
       - httpApi:
           path: /password
           method: PUT
-          # cors: true
-          # authorizer:
-          #   name: verifyToken
-          #   identitySource: method.request.header.Authorization
-          #   resultTtlInSeconds: 3600
+          cors: true
+          middleware:
+            pre:
+              - authenticateMiddleware
+              # - ${file(src/middleware/auth.middleware.ts):authenticateMiddleware}
+
 resources:
   Resources:
     MyIamRole:
@@ -96,44 +95,41 @@ resources:
               Statement:
                 - Effect: Allow
                   Action:
-                    - '*'
-                    # - dynamodb:Query
-                    # - dynamodb:Scan
-                    # - dynamodb:PutItem
-                    # - dynamodb:GetItem
-                    # - dynamodb:DeleteItem
-                    # - dynamodb:UpdateItem
+                    - dynamodb:Query
+                    - dynamodb:Scan
+                    - dynamodb:PutItem
+                    - dynamodb:GetItem
+                    - dynamodb:DeleteItem
+                    - dynamodb:UpdateItem
                   Resource:
-                    - '*'
-                    # - !Sub '${UsersDynamoDBTable.Arn}'
+                    - !Sub '${UsersDynamoDBTable.Arn}'
                     # - Fn::GetAtt: ["UsersDynamoDBTable", Arn]
-
-    # UsersDynamoDBTable:
-    #   Type: AWS::DynamoDB::Table
-    #   Properties:
-    #     TableName: ${self:custom.tableName}
-    #     AttributeDefinitions:
-    #       - AttributeName: "UserName"
-    #         AttributeType: "S"
-    #       - AttributeName: "MobileNumber"
-    #         AttributeType: "N"
-    #       - AttributeName: "Role"
-    #         AttributeType: "S"
-    #     KeySchema:
-    #       - AttributeName: "UserName"
-    #         KeyType: "HASH"
-    #       - AttributeName: "MobileNumber"
-    #         KeyType: "RANGE"
-    #     ProvisionedThroughput:
-    #       ReadCapacityUnits: 2
-    #       WriteCapacityUnits: 2
-    #     GlobalSecondaryIndexes:
-    #       - IndexName: RoleIndex
-    #         KeySchema:
-    #           - AttributeName: Role
-    #             KeyType: HASH
-    #         Projection:
-    #           ProjectionType: ALL
-    #         ProvisionedThroughput:
-    #             ReadCapacityUnits: 2
-    #             WriteCapacityUnits: 2
+    UsersDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: "UserName"
+            AttributeType: "S"
+          - AttributeName: "MobileNumber"
+            AttributeType: "N"
+          - AttributeName: "Role"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "UserName"
+            KeyType: "HASH"
+          - AttributeName: "MobileNumber"
+            KeyType: "RANGE"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 2
+          WriteCapacityUnits: 2
+        GlobalSecondaryIndexes:
+          - IndexName: RoleIndex
+            KeySchema:
+              - AttributeName: Role
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+                ReadCapacityUnits: 2
+                WriteCapacityUnits: 2
