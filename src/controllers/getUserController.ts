@@ -9,7 +9,7 @@ export const getUserController = async (event: APIGatewayProxyEvent): Promise<AP
             TableName: process.env.USERS_TABLE || ''
         }, (error: AWS.AWSError, data: AWS.DynamoDB.ScanOutput) => {
             if(error) {
-                console.log('Error occured while scanning data from DynamoDB')
+                console.log('Error occured while scanning data from DynamoDB', error)
             } else {
                 tableItems = data.Items
             }

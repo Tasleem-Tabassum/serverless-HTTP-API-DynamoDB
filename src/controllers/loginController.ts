@@ -12,6 +12,30 @@ export const loginController = async (event: APIGatewayProxyEvent): Promise<APIG
         };
       }
 
+      const reqData = JSON.parse(body)
+
+      const { userName, password } = reqData
+
+      const params = {
+        TableName: process.env.USERS_TABLE || '',
+        Key: {
+          'UserName': {S: userName}
+        },
+        ProjectionExpression: 'UserName'
+      }
+
+      dynamodb.getItem(params, (error, data) => {
+        if(error) {
+          console.log('Error while checking credentials:', error)
+        } else if(!data.Item) {
+          console.log('UserName not found', error)
+        } else {
+          if(data.Item?.password === password) {
+            
+          }
+        }
+      })
+
       return {
         statusCode: 200,
         body: JSON.stringify({  })
