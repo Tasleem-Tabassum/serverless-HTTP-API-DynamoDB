@@ -1,5 +1,8 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import AWS, { dynamodb } from '../config/aws';
+import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
+
 
 export const loginController = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
@@ -19,26 +22,34 @@ export const loginController = async (event: APIGatewayProxyEvent): Promise<APIG
       const params = {
         TableName: process.env.USERS_TABLE || '',
         Key: {
-          'UserName': {S: userName}
+          'UserName': userName
         },
         ProjectionExpression: 'UserName'
       }
 
-      dynamodb.getItem(params, (error, data) => {
-        if(error) {
-          console.log('Error while checking credentials:', error)
-        } else if(!data.Item) {
-          console.log('UserName not found', error)
-        } else {
-          if(data.Item?.password === password) {
-            
-          }
+      const data = await dynamodb.get(params).promise()
+      const itemRetrieved = data.Item
+      if(!itemRetrieved) {
+        return {
+          statusCode: 404,
+          body: "User not found"
         }
-      })
+      }
 
-      return {
-        statusCode: 200,
-        body: JSON.stringify({  })
+      const isMatch = await bcrypt.compare(password, itemRetrieved.password)
+      if(!isMatch) {
+        return {
+          statusCode: 404,
+          body: "Unable to login!"
+        }
+      } else {
+        const token = jwt.sign({UserName: userName}, process.env.JWT_SECRET || '', {
+          expiresIn: 3600
+        })
+        return {
+          statusCode: 200,
+          body: JSON.stringify({ message: 'Login successful', token })
+        }
       }
 
     } catch(error) {

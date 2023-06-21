@@ -1,5 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import AWS, { dynamodb } from '../config/aws';
+import * as bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 
 export const signUpController = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
@@ -12,52 +14,59 @@ export const signUpController = async (event: APIGatewayProxyEvent): Promise<API
             };
         }
 
-        const { userName, password, name, mobile } = JSON.parse(body);
+        const { userName, password, name, mobile, role } = JSON.parse(body);
 
-        if(!userName || !password || !name || !mobile) {
+        if(!userName || !password || !name || !mobile || !role) {
             return {
                 statusCode: 400,
                 body: "All the fields are mandatory"
             }
         }
 
-        if(userName !== String) {
+        if(typeof userName !== 'string') {
             return {
                 statusCode: 400,
                 body: "UserName must be a string"
             }
         }
 
-        if(password !== String) {
+        if(typeof password !== 'string') {
             return {
                 statusCode: 400,
                 body: "Password must be a string"
             }
         }
 
-        if(name !== String) {
+        if(typeof name !== 'string') {
             return {
                 statusCode: 400,
                 body: "Name must be a string"
             }
         }
         
-        if(mobile !== Number) {
+        if(typeof mobile !== 'number') {
             return {
                 statusCode: 400,
                 body: "Mobile Number must be a number"
             }
         }
 
-        await dynamodb.putItem({
+        const passwordHash = await bcrypt.hash(password, 8);
+
+        const params = {
             TableName: process.env.USERS_TABLE || '',
             Item: {
+                id: uuidv4(),
                 UserName: userName,
-                Password: password,
+                Password: passwordHash,
                 Name: name,
-                MobileNumber: mobile
+                Role: role,
+                MobileNumber: mobile,
+                createdAt: new Date()
             }
-        }).promise();
+        }
+
+        await dynamodb.put(params).promise();
         
         return {
             statusCode: 201,

@@ -6,6 +6,6 @@ AWS.config.update({
     region: process.env.AWS_REGION,
 })
 
-export const dynamodb = new AWS.DynamoDB();
+export const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 export default AWS;
