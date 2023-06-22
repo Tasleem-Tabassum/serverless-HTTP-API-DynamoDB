@@ -1,0 +1,135 @@
+service: users-auth
+
+frameworkVersion: '3'
+
+custom:
+  tableName: ${self:service}-user-table-${self:provider.stage}
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: dev
+  region: 'us-east-1'
+  iam:
+    role: MyIamRole
+  # role: MyIamRole
+  environment:
+    USERS_TABLE: ${self:custom.tableName}
+
+plugins:
+  - serverless-offline
+
+functions:
+  home:
+    handler: dist/index.handler
+    events:
+      - httpApi:
+          path: /
+          method: GET
+          cors: true
+  # signUp:
+  #   handler: dist/src/handler.signUp
+  #   events:
+  #     - httpApi:
+  #         path: /signup
+  #         method: POST
+  #         cors: true
+  # login:
+  #   handler: dist/src/handler.login
+  #   events:
+  #     - httpApi:
+  #         path: /login
+  #         method: POST
+  #         cors: true
+  # getUser:
+  #   handler: dist/src/handler.getUser
+  #   events:
+  #     - httpApi:
+  #         path: /user
+  #         method: GET
+  #         cors: true
+  #         middleware:
+  #           pre:
+  #             - authenticateMiddleware
+  #             # - ${file(src/middleware/auth.middleware.ts):authenticateMiddleware}
+  # updateUser:
+  #   handler: dist/src/handler.updateUser
+  #   events:
+  #     - httpApi:
+  #         path: /user
+  #         method: PUT
+  #         cors: true
+  #         middleware:
+  #           pre:
+  #             - authenticateMiddleware
+  #             # - ${file(src/middleware/auth.middleware.ts):authenticateMiddleware}
+  # changePassword:
+  #   handler: dist/src/handler.changePassword
+  #   events:
+  #     - httpApi:
+  #         path: /password
+  #         method: PUT
+  #         cors: true
+  #         middleware:
+  #           pre:
+  #             - authenticateMiddleware
+  #             - ${file(src/middleware/auth.middleware.ts):authenticateMiddleware}
+
+resources:
+  Resources:
+    MyIamRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:service}-role-${self:provider.stage}
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: 'Allow'
+              Principal:
+                Service: 'lambda.amazonaws.com'
+              Action: 'sts:AssumeRole'
+        Policies:
+          - PolicyName: DynamoDBAccessPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:Query
+                    - dynamodb:Scan
+                    - dynamodb:PutItem
+                    - dynamodb:GetItem
+                    - dynamodb:DeleteItem
+                    - dynamodb:UpdateItem
+                  Resource:
+                    - !Sub '${UsersDynamoDBTable.Arn}'
+                    # - Fn::GetAtt: ["UsersDynamoDBTable", Arn]
+    UsersDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: "UserName"
+            AttributeType: "S"
+          - AttributeName: "MobileNumber"
+            AttributeType: "N"
+          - AttributeName: "Role"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "UserName"
+            KeyType: "HASH"
+          - AttributeName: "MobileNumber"
+            KeyType: "RANGE"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 2
+          WriteCapacityUnits: 2
+        GlobalSecondaryIndexes:
+          - IndexName: RoleIndex
+            KeySchema:
+              - AttributeName: Role
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+                ReadCapacityUnits: 2
+                WriteCapacityUnits: 2
