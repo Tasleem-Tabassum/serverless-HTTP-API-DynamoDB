@@ -1,10 +1,10 @@
 {
-    "compilerOptions": {
-        "target": "es2016",
-        "strict": true,
-        "module":"CommonJS",
-        "outDir": "dist"
-    },
-    "include": ["*.ts"],
-    "exclude": ["node_modules"]
+  "compilerOptions": {
+    "target": "es2016",
+    "strict": true,
+    "module":"CommonJS",
+    "outDir": "dist"
+  },
+  "include": ["*.ts", "src/*.ts", "src/*/*.ts"],
+  "exclude": ["node_modules"]
 }
