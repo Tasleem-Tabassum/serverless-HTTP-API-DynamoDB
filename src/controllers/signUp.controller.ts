@@ -2,11 +2,11 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import AWS, { dynamodb } from '../config/aws';
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
-import { getUserFromDb } from "./getUser.controller";
 
 export const signUpController = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const body: string | null = event.body ?? null;
+        console.log(body)
 
         if (!body) {
             return {
@@ -52,9 +52,20 @@ export const signUpController = async (event: APIGatewayProxyEvent): Promise<API
             }
         }
 
-        const user = await getUserFromDb(userName, mobile);
+        const getDataParams = {
+            TableName: process.env.USERS_TABLE || '',
+            Key: {
+                UserName: userName,
+                MobileNumber: mobile
+            }
+        }
 
-        if(user) {
+        const user = await dynamodb.get(getDataParams).promise();
+        console.log(user)
+        
+
+        if(user.Item?.UserName !== undefined) {
+            console.log("user", user)
             return {
                 statusCode: 400,
                 body: JSON.stringify({

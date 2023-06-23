@@ -3,6 +3,8 @@ import AWS, { dynamodb } from '../config/aws';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { getUserFromDb } from "./getUser.controller";
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 export const loginController = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
@@ -19,41 +21,35 @@ export const loginController = async (event: APIGatewayProxyEvent): Promise<APIG
 
     const { userName, mobile, password } = reqData
 
-    // const params = {
-    //   TableName: process.env.USERS_TABLE || '',
-    //   Key: {
-    //     'UserName': userName,
-    //     'MobileNumber': mobile
-    //   },
-    //   ProjectionExpression: 'UserName'
-    // }
-
-    // const data = await dynamodb.get(params).promise()
-
-
-    const user = await getUserFromDb(userName, mobile)
-
-
-
-    console.log(user)
-    const itemRetrieved = user.Items
-    console.log("item retreived from db",itemRetrieved)
-
-    if(!itemRetrieved) {
+    if (!password) {
       return {
-        statusCode: 404,
-        body: "User not found"
-      }
+        statusCode: 500,
+        body: "User password is missing",
+      };
     }
 
-    const isMatch = await bcrypt.compare(password, itemRetrieved.password)
-    console.log("comparing passwords", isMatch)
+    const user = await getUserFromDb(userName, mobile);
 
-    if(!isMatch) {
+    console.log("user retrieved from db", user);
+
+    if (!user || user.length === 0 || !user[0].Password) {
       return {
         statusCode: 404,
-        body: "Unable to login!"
-      }
+        body: "User not found",
+      };
+    }
+
+    const userPassword = user[0].Password;
+
+    const isMatch = await bcrypt.compare(password, userPassword);
+
+    console.log("Comparing passwords:", isMatch);
+
+    if (!isMatch) {
+      return {
+        statusCode: 401,
+        body: "Invalid password",
+      };
     } else {
       console.log("Before generating token")
       const token = jwt.sign({UserName: userName}, process.env.JWT_SECRET || '', {
