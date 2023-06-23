@@ -1,4 +1,4 @@
-service: users-auth
+service: user-auth
 
 frameworkVersion: '3'
 

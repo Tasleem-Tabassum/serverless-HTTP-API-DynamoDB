@@ -17,6 +17,8 @@ export const signUpController = async (event: APIGatewayProxyEvent): Promise<API
 
         const { userName, password, name, mobile, role } = JSON.parse(body);
 
+        console.log(userName, password, name, mobile, role)
+
         if(!userName || !password || !name || !mobile || !role) {
             return {
                 statusCode: 400,
