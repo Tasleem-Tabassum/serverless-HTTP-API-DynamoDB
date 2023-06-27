@@ -5,3 +5,7 @@ dist
 .env
 
 .serverless
+
+schema
+
+apollo-server.ts

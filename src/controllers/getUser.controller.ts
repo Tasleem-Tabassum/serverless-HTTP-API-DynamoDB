@@ -1,12 +1,21 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import AWS, { dynamodb } from '../config/aws';
+import * as jwt from 'jsonwebtoken';
 
 export const getUserController = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
-      const decodedToken = (event as any).decodedToken;
-      console.log('decodedToken',decodedToken)
 
-      if(!decodedToken || !(event as any).body.UserName) {
+      const authToken = event.headers?.authorization || '';
+
+      const token = authToken.split(' ')[1];
+
+      const secretKey = process.env.JWT_SECRET || ''
+
+      const decodedToken: any = jwt.verify(token, secretKey);
+
+      console.log(decodedToken)
+
+      if(!authToken || !decodedToken || !decodedToken.UserName) {
         console.log('decodedToken',decodedToken)
         return {
             statusCode: 401,
@@ -14,10 +23,9 @@ export const getUserController = async (event: APIGatewayProxyEvent): Promise<AP
         };
       }
 
-      const userName = (event as any).body.UserName;
-      const mobile = (event as any).body.Mobile;
+      const userName = decodedToken.UserName;
 
-      const user = await getUserFromDb(userName, mobile)
+      const user = await getUserFromDb(userName)
       console.log('user in getuser',user)
 
       if(!user) {
@@ -41,14 +49,13 @@ export const getUserController = async (event: APIGatewayProxyEvent): Promise<AP
   }
 };
 
-export const getUserFromDb = async (userName: string, mobile: number): Promise<any> => {
+export const getUserFromDb = async (userName: string): Promise<any> => {
   const params = {
     TableName: process.env.USERS_TABLE || '',
     KeyConditionExpression: 'UserName = :userName',
     ExpressionAttributeValues: {
       ':userName': userName,
-    },
-    ProjectionExpression: 'UserName, Password'
+    }
   };
 
   try {

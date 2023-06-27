@@ -55,7 +55,7 @@ export const signUpController = async (event: APIGatewayProxyEvent): Promise<API
         }
 
         const getDataParams = {
-            TableName: process.env.USERS_TABLE || '',
+            TableName: 'user-auth-user-table-dev',
             Key: {
                 UserName: userName,
                 MobileNumber: mobile

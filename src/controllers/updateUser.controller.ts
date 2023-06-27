@@ -1,41 +1,56 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { dynamodb } from "../config/aws";
+import * as jwt from 'jsonwebtoken';
 
 export const updateUserController = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
+      console.log(event)
+      const authToken = event.headers?.authorization || '';
 
-      const decodedToken = (event as any).decodedToken;
+      const token = authToken.split(' ')[1];
 
-      if(!decodedToken || !event.body) {
+      const secretKey = process.env.JWT_SECRET || ''
+
+      const decodedToken: any = jwt.verify(token, secretKey);
+
+      console.log(decodedToken)
+
+      if(!decodedToken || !decodedToken.UserName) {
+        console.log('decodedToken',decodedToken)
         return {
-          statusCode: 401,
-          body: JSON.stringify({ message: 'Unauthorized' }),
+            statusCode: 401,
+            body: JSON.stringify({ message: 'Unauthorized' }),
         };
       }
 
-      const userName = decodedToken.UserName;
+      const reqData: string | null = event.body ?? null;
 
-      const reqData = JSON.parse(event.body);
-      const { password, name, role, mobile } = reqData;
+      if (!reqData) {
+        return {
+          statusCode: 400,
+          body: 'Request body is missing',
+        };
+      }
 
-      const updateExpression = 'SET #password = :password, #name = :name, #role = :role, #mobile = :mobile';
+      const { userName, password, name, role, mobile } = JSON.parse(reqData);
+
+      const updateExpression = 'SET #password = :password, #name = :name, #role = :role';
       const expressionAttributeNames = {
         '#password': 'Password',
         '#name': 'Name',
         '#role': 'Role',
-        '#mobile': 'MobileNumber'
       };
       const expressionAttributeValues = {
         ':password': password,
         ':name': name,
         ':role': role,
-        ':mobile': mobile
       }
 
       const params = {
         TableName: process.env.USERS_TABLE || '',
         Key: {
-          'UserName': userName
+          'UserName': userName,
+          'MobileNumber': mobile
         },
         UpdateExpression: updateExpression,
         ExpressionAttributeNames: expressionAttributeNames,

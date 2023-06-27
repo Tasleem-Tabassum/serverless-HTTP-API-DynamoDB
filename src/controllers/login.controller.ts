@@ -28,7 +28,7 @@ export const loginController = async (event: APIGatewayProxyEvent): Promise<APIG
       };
     }
 
-    const user = await getUserFromDb(userName, mobile);
+    const user = await getUserFromDb(userName);
 
     console.log("user retrieved from db", user);
 
@@ -52,7 +52,8 @@ export const loginController = async (event: APIGatewayProxyEvent): Promise<APIG
       };
     } else {
       console.log("Before generating token")
-      const token = jwt.sign({UserName: userName}, process.env.JWT_SECRET || '', {
+      const secretKey = process.env.JWT_SECRET || ''
+      const token = jwt.sign({UserName: userName}, secretKey, {
         expiresIn: 3600
       })
       console.log("Before generating token")

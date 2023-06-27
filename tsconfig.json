@@ -5,6 +5,6 @@
     "module":"CommonJS",
     "outDir": "dist"
   },
-  "include": ["*.ts", "src/*.ts", "src/*/*.ts"],
+  "include": ["*.ts", "src/*.ts", "src/*/*.ts", "__tests__/*.test.ts"],
   "exclude": ["node_modules"]
 }

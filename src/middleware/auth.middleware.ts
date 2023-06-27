@@ -8,33 +8,40 @@ dotenv.config();
 // }
 
 export const authenticateMiddleware = async (
-  event: CustomAuthorizerEvent
+  event: any
   ): Promise<APIGatewayAuthorizerResult> => {
   try {
 
-    const authToken = event.authorizationToken || '';
+    console.log(event)
 
-    console.log('authtoken',authToken)
+    const authToken = event.headers?.authorization || '';
 
-    const token = authToken.replace('Bearer ', '')
-    console.log('authToken token', token)
+    console.log(authToken)
+
+    const token = authToken.split(' ')[1];
+    console.log('without bearer', token)
 
     if(token.length === 0) {
-      return generatePolicy('undefined', 'Deny', event.methodArn)
+      return generatePolicy('undefined', 'Deny', event.routeArn)
     }
 
-    const decodedToken: jwt.JwtPayload = jwt.verify(token, process.env.JWT_SECRET || '') as jwt.JwtPayload;
+    console.log("jwt secret",process.env.JWT_SECRET)
+    const secretKey = process.env.JWT_SECRET || ''
+
+    const decodedToken: any = jwt.verify(token, secretKey);
+
+    console.log("decodedtoken",decodedToken)
 
     if(typeof decodedToken.UserName !== 'undefined' && decodedToken.UserName.length > 0) {
-      return generatePolicy(decodedToken.UserName, 'Allow', event.methodArn)
+      return generatePolicy(decodedToken.UserName, 'Allow', event.routeArn)
       
     }
 
-    return generatePolicy('undefined', 'Deny', event.methodArn)
+    return generatePolicy('undefined', 'Deny', event.routeArn)
     
   } catch(error) {
     console.error("Authentication error:", error);
-    return generatePolicy('undefined', 'Deny', event.methodArn)
+    return generatePolicy('undefined', 'Deny', event.routeArn)
     // return {
     //   statusCode: 401,
     //   body: JSON.stringify({ message: "Unauthorized"})
